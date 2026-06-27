@@ -139,6 +139,23 @@
       flex: 1;
       margin: 0;
     }
+
+    .photo-section {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+
+    .photo-section h4 {
+      margin: 0 0 10px 0;
+      color: #0078D4;
+    }
+
+    .photo-section img {
+      max-height: 400px;
+      margin: 10px 0;
+    }
   </style>
 </head>
 
@@ -177,7 +194,7 @@
 
   <!-- LIVING ROOM -->
   <div class="section-title">Living Room</div>
-  <label class="item"><input type="checkbox" id="lr1"> Smell</label>
+  <label class="item"><input type="checkbox" id="lr1"> Fresh scent</label>
   <label class="item"><input type="checkbox" id="lr2"> Furniture made</label>
   <label class="item"><input type="checkbox" id="lr3"> TV remote visible</label>
   <label class="item"><input type="checkbox" id="lr4"> Blinds open</label>
@@ -324,7 +341,7 @@ const itemLabels = {
   entry1: "Front Door closes properly",
   entry2: "Smart Lock functions",
   entry3: "Entry Light on",
-  lr1: "Smell",
+  lr1: "Fresh scent",
   lr2: "Furniture made",
   lr3: "TV remote visible",
   lr4: "Blinds open",
@@ -371,6 +388,9 @@ const itemLabels = {
   f3: "Doors Locked",
   f4: "Thermostat Set"
 };
+
+const photoIds = ['entryPhoto', 'lrPhoto', 'kPhoto', 'bPhoto', 'baPhoto', 'finalPhoto'];
+const photoLabels = ['Entry', 'Living Room', 'Kitchen', 'Bedroom', 'Bathroom', 'Final'];
 
 function setupPhotoUpload(inputId, imgId, labelId) {
   const input = document.getElementById(inputId);
@@ -462,17 +482,23 @@ function formatInspectionHTML(inspection) {
   let html = '';
   
   html += `<h3>Entry</h3>${formatSectionHTML(inspection.entry)}`;
-  html += `<h3>Living Room</h3>${formatSectionHTML(inspection.livingRoom)}`;
-  
+  if (inspection.entryPhoto) html += `<div class="photo-section"><h4>📷 Entry Photo</h4><img src="${inspection.entryPhoto}" style="width: 100%; max-height: 400px; border-radius: 8px;"></div>`;
   if (inspection.entryNotes) html += `<p><strong>Notes:</strong> ${inspection.entryNotes}</p>`;
   
+  html += `<h3>Living Room</h3>${formatSectionHTML(inspection.livingRoom)}`;
+  if (inspection.lrPhoto) html += `<div class="photo-section"><h4>📷 Living Room Photo</h4><img src="${inspection.lrPhoto}" style="width: 100%; max-height: 400px; border-radius: 8px;"></div>`;
+  if (inspection.lrNotes) html += `<p><strong>Notes:</strong> ${inspection.lrNotes}</p>`;
+  
   html += `<h3>Kitchen</h3>${formatSectionHTML(inspection.kitchen)}`;
+  if (inspection.kPhoto) html += `<div class="photo-section"><h4>📷 Kitchen Photo</h4><img src="${inspection.kPhoto}" style="width: 100%; max-height: 400px; border-radius: 8px;"></div>`;
   if (inspection.kNotes) html += `<p><strong>Notes:</strong> ${inspection.kNotes}</p>`;
   
   html += `<h3>Bedrooms</h3>${formatSectionHTML(inspection.bedroom)}`;
+  if (inspection.bPhoto) html += `<div class="photo-section"><h4>📷 Bedroom Photo</h4><img src="${inspection.bPhoto}" style="width: 100%; max-height: 400px; border-radius: 8px;"></div>`;
   if (inspection.bNotes) html += `<p><strong>Notes:</strong> ${inspection.bNotes}</p>`;
   
   html += `<h3>Bathroom</h3>${formatSectionHTML(inspection.bathroom)}`;
+  if (inspection.baPhoto) html += `<div class="photo-section"><h4>📷 Bathroom Photo</h4><img src="${inspection.baPhoto}" style="width: 100%; max-height: 400px; border-radius: 8px;"></div>`;
   if (inspection.baNotes) html += `<p><strong>Notes:</strong> ${inspection.baNotes}</p>`;
   
   html += `<h3>Laundry</h3>${formatSectionHTML(inspection.laundry)}`;
@@ -480,6 +506,7 @@ function formatInspectionHTML(inspection) {
   html += `<h3>Inventory</h3>${formatSectionHTML(inspection.inventory)}`;
   html += `<h3>Maintenance</h3>${formatSectionHTML(inspection.maintenance)}`;
   html += `<h3>Final Quality Check</h3>${formatSectionHTML(inspection.final)}`;
+  if (inspection.finalPhoto) html += `<div class="photo-section"><h4>📷 Final Photo</h4><img src="${inspection.finalPhoto}" style="width: 100%; max-height: 400px; border-radius: 8px;"></div>`;
   
   if (inspection.nextSteps) {
     html += `<div style="background: #f0f8ff; padding: 10px; border-radius: 6px; margin-top: 10px;">
@@ -519,20 +546,26 @@ function deleteAllInspections() {
 function save() {
   const data = {
     entry: collect("entry"),
+    entryPhoto: document.getElementById("entryPreview").src,
     entryNotes: document.getElementById("entryNotes").value,
     livingRoom: collect("lr"),
+    lrPhoto: document.getElementById("lrPreview").src,
     lrNotes: document.getElementById("lrNotes").value,
     kitchen: collect("k"),
+    kPhoto: document.getElementById("kPreview").src,
     kNotes: document.getElementById("kNotes").value,
     bedroom: collect("b"),
+    bPhoto: document.getElementById("bPreview").src,
     bNotes: document.getElementById("bNotes").value,
     bathroom: collect("ba"),
+    baPhoto: document.getElementById("baPreview").src,
     baNotes: document.getElementById("baNotes").value,
     laundry: collect("l"),
     utilities: collect("u"),
     inventory: collect("i"),
     maintenance: collect("m"),
     final: collect("f"),
+    finalPhoto: document.getElementById("finalPreview").src,
     nextSteps: document.getElementById("nextSteps").value,
     timestamp: new Date().toISOString()
   };
