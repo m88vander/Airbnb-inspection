@@ -44,6 +44,11 @@
       width: 100%;
       height: 60px;
       margin-top: 8px;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Arial;
     }
 
     button {
@@ -54,6 +59,12 @@
       border: none;
       border-radius: 6px;
       margin-top: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #005a9e;
     }
 
     img {
@@ -63,6 +74,29 @@
     }
 
     .photo-input {
+      margin-top: 8px;
+    }
+
+    .next-step-section {
+      background: #f0f8ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border-left: 4px solid #0078D4;
+    }
+
+    .next-step-section h3 {
+      margin-top: 0;
+      color: #0078D4;
+    }
+
+    .next-step-section textarea {
+      width: 100%;
+      height: 80px;
+      margin-top: 8px;
+    }
+
+    input[type="file"] {
       margin-top: 8px;
     }
   </style>
@@ -179,7 +213,13 @@
   <input type="file" accept="image/*" capture="environment" id="finalPhoto">
   <img id="finalPreview">
 
-  <button onclick="save()">Save Inspection</button>
+  <!-- NEXT STEPS -->
+  <div class="next-step-section">
+    <h3>Next Steps</h3>
+    <textarea id="nextSteps" placeholder="List any follow-up actions or repairs needed..."></textarea>
+  </div>
+
+  <button onclick="save()">Save & Email Inspection</button>
 
 </div>
 
@@ -214,6 +254,7 @@ function save() {
     inventory: collect("i"),
     maintenance: collect("m"),
     final: collect("f"),
+    nextSteps: document.getElementById("nextSteps").value,
     timestamp: new Date().toISOString()
   };
 
@@ -221,7 +262,10 @@ function save() {
   existing.unshift(data);
   localStorage.setItem("inspections", JSON.stringify(existing));
 
-  alert("Inspection Saved");
+  // Send email via FormSubmit
+  sendEmail(data);
+  
+  alert("Inspection Saved & Email Sent");
 }
 
 function collect(prefix) {
@@ -232,6 +276,79 @@ function collect(prefix) {
     }
   });
   return items;
+}
+
+function sendEmail(data) {
+  // Create a summary of the inspection
+  let summary = formatInspectionSummary(data);
+  
+  // Use FormSubmit service to send email (no backend required)
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://formsubmit.co/m88vander@gmail.com';
+  form.style.display = 'none';
+
+  const subject = document.createElement('input');
+  subject.type = 'hidden';
+  subject.name = '_subject';
+  subject.value = 'Airbnb Inspection Report - ' + new Date().toLocaleDateString();
+
+  const message = document.createElement('textarea');
+  message.name = 'message';
+  message.value = summary;
+
+  const redirect = document.createElement('input');
+  redirect.type = 'hidden';
+  redirect.name = '_next';
+  redirect.value = window.location.href;
+
+  form.appendChild(subject);
+  form.appendChild(message);
+  form.appendChild(redirect);
+  document.body.appendChild(form);
+  form.submit();
+  document.body.removeChild(form);
+}
+
+function formatInspectionSummary(data) {
+  let summary = `AIRBNB INSPECTION REPORT\n`;
+  summary += `Date: ${new Date(data.timestamp).toLocaleString()}\n`;
+  summary += `=================================\n\n`;
+
+  summary += `ENTRY:\n${formatSection(data.entry)}\n`;
+  summary += `LIVING ROOM:\n${formatSection(data.livingRoom)}\n`;
+  summary += `KITCHEN:\n${formatSection(data.kitchen)}\n`;
+  summary += `BEDROOMS:\n${formatSection(data.bedroom)}\n`;
+  summary += `BATHROOM:\n${formatSection(data.bathroom)}\n`;
+  summary += `LAUNDRY:\n${formatSection(data.laundry)}\n`;
+  summary += `UTILITIES:\n${formatSection(data.utilities)}\n`;
+  summary += `INVENTORY:\n${formatSection(data.inventory)}\n`;
+  summary += `MAINTENANCE:\n${formatSection(data.maintenance)}\n`;
+  summary += `FINAL QUALITY CHECK:\n${formatSection(data.final)}\n`;
+  
+  if (data.nextSteps) {
+    summary += `\nNEXT STEPS:\n${data.nextSteps}\n`;
+  }
+  
+  return summary;
+}
+
+function formatSection(sectionData) {
+  if (!sectionData) return 'No items checked';
+  
+  const checked = Object.entries(sectionData)
+    .filter(([key, val]) => val === true)
+    .map(([key]) => '✓ ' + key);
+  
+  const unchecked = Object.entries(sectionData)
+    .filter(([key, val]) => val === false)
+    .map(([key]) => '✗ ' + key);
+  
+  let result = '';
+  if (checked.length > 0) result += 'Checked:\n  ' + checked.join('\n  ') + '\n';
+  if (unchecked.length > 0) result += 'Unchecked:\n  ' + unchecked.join('\n  ') + '\n';
+  
+  return result || 'No items';
 }
 </script>
 
