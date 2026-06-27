@@ -75,10 +75,6 @@
       object-fit: cover;
     }
 
-    .photo-input {
-      margin-top: 8px;
-    }
-
     .photo-container {
       position: relative;
       margin-top: 8px;
@@ -132,12 +128,33 @@
       color: #666;
       margin-top: 4px;
     }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .button-group button {
+      flex: 1;
+      margin: 0;
+    }
   </style>
 </head>
 
 <body>
 
 <h2>Airbnb Inspection</h2>
+
+<div class="card">
+  <div class="button-group">
+    <button onclick="showInspection()">New Inspection</button>
+    <button onclick="showHistory()">View History</button>
+  </div>
+</div>
+
+<!-- INSPECTION FORM -->
+<div id="inspectionForm">
 
 <div class="card">
 
@@ -290,7 +307,71 @@
 
 </div>
 
+</div>
+
+<!-- HISTORY VIEW -->
+<div id="historyView" style="display:none;">
+
+<div class="card">
+  <h2>Inspection History</h2>
+  <div id="inspectionsList"></div>
+</div>
+
+</div>
+
 <script>
+const itemLabels = {
+  entry1: "Front Door closes properly",
+  entry2: "Smart Lock functions",
+  entry3: "Entry Light on",
+  lr1: "Smell",
+  lr2: "Furniture made",
+  lr3: "TV remote visible",
+  lr4: "Blinds open",
+  lr5: "Floors clean",
+  lr6: "Plants watered",
+  k1: "Countertops",
+  k2: "Sink",
+  k3: "Refrigerator",
+  k4: "Oven / Range",
+  k5: "Microwave",
+  k6: "Cabinets organized",
+  k7: "Coffee Supplies Restocked",
+  k8: "Trash Removed",
+  b1: "Bed Made",
+  b2: "Extra blankets",
+  b3: "Drapes tied up",
+  ba1: "Toilet",
+  ba2: "Shower/Tub",
+  ba3: "Vanity",
+  ba4: "Mirror",
+  ba5: "Towels",
+  ba6: "Supplies Restocked",
+  ba7: "Floors",
+  l1: "Washer",
+  l2: "Dryer",
+  l3: "Laundry Supplies",
+  u1: "Temperature nice",
+  u2: "Air quality nice",
+  u3: "Smoke Detectors test",
+  u4: "CO Detector test",
+  u5: "Internet/Wi-Fi",
+  u6: "Thermostat set",
+  i1: "Missing Items",
+  i2: "Broken Items",
+  i3: "Low Supplies",
+  m1: "Plumbing",
+  m2: "Electrical",
+  m3: "Appliances",
+  m4: "Furniture Damage",
+  m5: "Paint",
+  m6: "General Repairs",
+  f1: "Property Ready",
+  f2: "Lights Off",
+  f3: "Doors Locked",
+  f4: "Thermostat Set"
+};
+
 function setupPhotoUpload(inputId, imgId, labelId) {
   const input = document.getElementById(inputId);
   const img = document.getElementById(imgId);
@@ -318,13 +399,135 @@ setupPhotoUpload('bPhoto', 'bPreview', 'bLabel');
 setupPhotoUpload('baPhoto', 'baPreview', 'baLabel');
 setupPhotoUpload('finalPhoto', 'finalPreview', 'finalLabel');
 
+function showInspection() {
+  document.getElementById('inspectionForm').style.display = 'block';
+  document.getElementById('historyView').style.display = 'none';
+}
+
+function showHistory() {
+  document.getElementById('inspectionForm').style.display = 'none';
+  document.getElementById('historyView').style.display = 'block';
+  loadHistory();
+}
+
+function loadHistory() {
+  const inspections = JSON.parse(localStorage.getItem('inspections') || '[]');
+  const container = document.getElementById('inspectionsList');
+  
+  if (inspections.length === 0) {
+    container.innerHTML = '<p>No inspections saved yet.</p>';
+    return;
+  }
+  
+  container.innerHTML = inspections.map((inspection, index) => {
+    const date = new Date(inspection.timestamp).toLocaleString();
+    return `
+      <div class="card" style="margin-bottom: 20px; padding: 15px; cursor: pointer;" onclick="toggleInspection(${index})">
+        <h3 style="margin: 0 0 5px 0; color: #0078D4;">${date}</h3>
+        <p style="margin: 0; color: #666; font-size: 14px;">Click to view full details</p>
+      </div>
+    `;
+  }).join('') + `
+    <button onclick="deleteAllInspections()" style="background: #d32f2f; margin-top: 20px;">🗑️ Delete All Inspections</button>
+  `;
+}
+
+function toggleInspection(index) {
+  const inspections = JSON.parse(localStorage.getItem('inspections') || '[]');
+  const inspection = inspections[index];
+  const elemId = `inspection-${index}`;
+  const elem = document.getElementById(elemId);
+  
+  if (elem && elem.style.display !== 'none') {
+    elem.style.display = 'none';
+    return;
+  }
+  
+  const html = formatInspectionHTML(inspection);
+  
+  if (elem) {
+    elem.innerHTML = html;
+    elem.style.display = 'block';
+  } else {
+    const container = document.getElementById('inspectionsList');
+    const div = document.createElement('div');
+    div.id = elemId;
+    div.style.cssText = 'margin-top: 10px; padding: 15px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #0078D4;';
+    div.innerHTML = html;
+    container.insertBefore(div, container.children[index + 1]);
+  }
+}
+
+function formatInspectionHTML(inspection) {
+  let html = '';
+  
+  html += `<h3>Entry</h3>${formatSectionHTML(inspection.entry)}`;
+  html += `<h3>Living Room</h3>${formatSectionHTML(inspection.livingRoom)}`;
+  
+  if (inspection.entryNotes) html += `<p><strong>Notes:</strong> ${inspection.entryNotes}</p>`;
+  
+  html += `<h3>Kitchen</h3>${formatSectionHTML(inspection.kitchen)}`;
+  if (inspection.kNotes) html += `<p><strong>Notes:</strong> ${inspection.kNotes}</p>`;
+  
+  html += `<h3>Bedrooms</h3>${formatSectionHTML(inspection.bedroom)}`;
+  if (inspection.bNotes) html += `<p><strong>Notes:</strong> ${inspection.bNotes}</p>`;
+  
+  html += `<h3>Bathroom</h3>${formatSectionHTML(inspection.bathroom)}`;
+  if (inspection.baNotes) html += `<p><strong>Notes:</strong> ${inspection.baNotes}</p>`;
+  
+  html += `<h3>Laundry</h3>${formatSectionHTML(inspection.laundry)}`;
+  html += `<h3>Utilities</h3>${formatSectionHTML(inspection.utilities)}`;
+  html += `<h3>Inventory</h3>${formatSectionHTML(inspection.inventory)}`;
+  html += `<h3>Maintenance</h3>${formatSectionHTML(inspection.maintenance)}`;
+  html += `<h3>Final Quality Check</h3>${formatSectionHTML(inspection.final)}`;
+  
+  if (inspection.nextSteps) {
+    html += `<div style="background: #f0f8ff; padding: 10px; border-radius: 6px; margin-top: 10px;">
+      <strong>Next Steps:</strong><br>${inspection.nextSteps.replace(/\n/g, '<br>')}
+    </div>`;
+  }
+  
+  return html;
+}
+
+function formatSectionHTML(sectionData) {
+  if (!sectionData) return '<p>No items</p>';
+  
+  const checked = Object.entries(sectionData)
+    .filter(([key, val]) => val === true)
+    .map(([key]) => `<li style="color: green;">✓ ${itemLabels[key] || key}</li>`);
+  
+  const unchecked = Object.entries(sectionData)
+    .filter(([key, val]) => val === false)
+    .map(([key]) => `<li style="color: red;">✗ ${itemLabels[key] || key}</li>`);
+  
+  let html = '<ul style="margin: 5px 0; padding-left: 20px;">';
+  if (checked.length > 0) html += checked.join('');
+  if (unchecked.length > 0) html += unchecked.join('');
+  html += '</ul>';
+  
+  return html || '<p>No items</p>';
+}
+
+function deleteAllInspections() {
+  if (confirm('Are you sure? This will delete all saved inspections.')) {
+    localStorage.removeItem('inspections');
+    loadHistory();
+  }
+}
+
 function save() {
   const data = {
     entry: collect("entry"),
+    entryNotes: document.getElementById("entryNotes").value,
     livingRoom: collect("lr"),
+    lrNotes: document.getElementById("lrNotes").value,
     kitchen: collect("k"),
+    kNotes: document.getElementById("kNotes").value,
     bedroom: collect("b"),
+    bNotes: document.getElementById("bNotes").value,
     bathroom: collect("ba"),
+    baNotes: document.getElementById("baNotes").value,
     laundry: collect("l"),
     utilities: collect("u"),
     inventory: collect("i"),
@@ -342,6 +545,12 @@ function save() {
   sendEmail(data);
   
   alert("Inspection Saved & Email Sent");
+  
+  // Clear form
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+  document.querySelectorAll('textarea').forEach(el => el.value = '');
+  document.querySelectorAll('img').forEach(el => el.src = '');
+  document.querySelectorAll('.photo-label').forEach(el => el.textContent = '');
 }
 
 function collect(prefix) {
@@ -355,10 +564,8 @@ function collect(prefix) {
 }
 
 function sendEmail(data) {
-  // Create a summary of the inspection
   let summary = formatInspectionSummary(data);
   
-  // Use FormSubmit service to send email (no backend required)
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = 'https://formsubmit.co/m88vander@gmail.com';
@@ -391,16 +598,21 @@ function formatInspectionSummary(data) {
   summary += `Date: ${new Date(data.timestamp).toLocaleString()}\n`;
   summary += `=================================\n\n`;
 
-  summary += `ENTRY:\n${formatSection(data.entry)}\n`;
-  summary += `LIVING ROOM:\n${formatSection(data.livingRoom)}\n`;
-  summary += `KITCHEN:\n${formatSection(data.kitchen)}\n`;
-  summary += `BEDROOMS:\n${formatSection(data.bedroom)}\n`;
-  summary += `BATHROOM:\n${formatSection(data.bathroom)}\n`;
-  summary += `LAUNDRY:\n${formatSection(data.laundry)}\n`;
-  summary += `UTILITIES:\n${formatSection(data.utilities)}\n`;
-  summary += `INVENTORY:\n${formatSection(data.inventory)}\n`;
-  summary += `MAINTENANCE:\n${formatSection(data.maintenance)}\n`;
-  summary += `FINAL QUALITY CHECK:\n${formatSection(data.final)}\n`;
+  summary += `ENTRY:\n${formatSectionSummary(data.entry)}`;
+  if (data.entryNotes) summary += `Notes: ${data.entryNotes}\n`;
+  summary += `\nLIVING ROOM:\n${formatSectionSummary(data.livingRoom)}`;
+  if (data.lrNotes) summary += `Notes: ${data.lrNotes}\n`;
+  summary += `\nKITCHEN:\n${formatSectionSummary(data.kitchen)}`;
+  if (data.kNotes) summary += `Notes: ${data.kNotes}\n`;
+  summary += `\nBEDROOMS:\n${formatSectionSummary(data.bedroom)}`;
+  if (data.bNotes) summary += `Notes: ${data.bNotes}\n`;
+  summary += `\nBATHROOM:\n${formatSectionSummary(data.bathroom)}`;
+  if (data.baNotes) summary += `Notes: ${data.baNotes}\n`;
+  summary += `\nLAUNDRY:\n${formatSectionSummary(data.laundry)}`;
+  summary += `\nUTILITIES:\n${formatSectionSummary(data.utilities)}`;
+  summary += `\nINVENTORY:\n${formatSectionSummary(data.inventory)}`;
+  summary += `\nMAINTENANCE:\n${formatSectionSummary(data.maintenance)}`;
+  summary += `\nFINAL QUALITY CHECK:\n${formatSectionSummary(data.final)}`;
   
   if (data.nextSteps) {
     summary += `\nNEXT STEPS:\n${data.nextSteps}\n`;
@@ -409,22 +621,22 @@ function formatInspectionSummary(data) {
   return summary;
 }
 
-function formatSection(sectionData) {
-  if (!sectionData) return 'No items checked';
+function formatSectionSummary(sectionData) {
+  if (!sectionData) return 'No items\n';
   
   const checked = Object.entries(sectionData)
     .filter(([key, val]) => val === true)
-    .map(([key]) => '✓ ' + key);
+    .map(([key]) => `✓ ${itemLabels[key] || key}`);
   
   const unchecked = Object.entries(sectionData)
     .filter(([key, val]) => val === false)
-    .map(([key]) => '✗ ' + key);
+    .map(([key]) => `✗ ${itemLabels[key] || key}`);
   
   let result = '';
   if (checked.length > 0) result += 'Checked:\n  ' + checked.join('\n  ') + '\n';
   if (unchecked.length > 0) result += 'Unchecked:\n  ' + unchecked.join('\n  ') + '\n';
   
-  return result || 'No items';
+  return result || 'No items\n';
 }
 </script>
 
