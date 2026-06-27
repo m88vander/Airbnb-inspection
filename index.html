@@ -2,41 +2,58 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inspection App</title>
+  <title>Airbnb Inspection App</title>
+
   <style>
     body {
       font-family: Arial;
-      margin: 15px;
-      background: #f5f5f5;
+      margin: 12px;
+      background: #f4f4f4;
     }
-    h2 { margin-bottom: 10px; }
+
+    h2 {
+      margin-bottom: 10px;
+    }
 
     .card {
       background: white;
-      padding: 15px;
+      padding: 12px;
       border-radius: 10px;
       margin-bottom: 15px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    select, textarea, input, button {
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+    }
+
+    .item input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+
+    textarea {
       width: 100%;
-      padding: 10px;
+      height: 60px;
       margin-top: 8px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
     }
 
     button {
+      width: 100%;
+      padding: 10px;
       background: #0078D4;
       color: white;
       border: none;
-      font-weight: bold;
-    }
-
-    button.secondary {
-      background: gray;
+      border-radius: 6px;
+      margin-top: 10px;
     }
 
     img {
@@ -45,122 +62,177 @@
       border-radius: 8px;
     }
 
-    .inspection {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
-    }
-
-    .small {
-      font-size: 12px;
-      color: #666;
+    .photo-input {
+      margin-top: 8px;
     }
   </style>
 </head>
 
 <body>
 
-<h2>Building Inspection Tool</h2>
+<h2>Airbnb Inspection</h2>
 
 <div class="card">
-  <label>Category</label>
-  <select id="category">
-    <option>Kitchen</option>
-    <option>Bathroom</option>
-    <option>Living Room</option>
-    <option>Bedroom</option>
-    <option>Exterior</option>
-    <option>Other</option>
-  </select>
 
-  <label>Photo</label>
-  <input type="file" accept="image/*" capture="environment" id="photoInput">
+  <!-- ENTRY -->
+  <div class="section-title">Entry</div>
+  <label class="item"><input type="checkbox" id="entry1"> Front Door closes properly</label>
+  <label class="item"><input type="checkbox" id="entry2"> Smart Lock functions</label>
+  <label class="item"><input type="checkbox" id="entry3"> Entry Light on</label>
 
-  <img id="preview" style="display:none;" />
+  <div class="photo-input">
+    <input type="file" accept="image/*" capture="environment" id="entryPhoto">
+    <img id="entryPreview">
+  </div>
 
-  <label>Notes</label>
-  <textarea id="notes" placeholder="Add details..."></textarea>
+  <textarea id="entryNotes" placeholder="Entry notes..."></textarea>
 
-  <button onclick="saveInspection()">Save Inspection</button>
-</div>
+  <!-- LIVING ROOM -->
+  <div class="section-title">Living Room</div>
+  <label class="item"><input type="checkbox" id="lr1"> Smell</label>
+  <label class="item"><input type="checkbox" id="lr2"> Furniture made</label>
+  <label class="item"><input type="checkbox" id="lr3"> TV remote visible</label>
+  <label class="item"><input type="checkbox" id="lr4"> Blinds open</label>
+  <label class="item"><input type="checkbox" id="lr5"> Floors clean</label>
+  <label class="item"><input type="checkbox" id="lr6"> Plants watered</label>
 
-<div class="card">
-  <h3>Saved Inspections</h3>
-  <button class="secondary" onclick="exportData()">Export JSON</button>
-  <div id="list"></div>
+  <input type="file" accept="image/*" capture="environment" id="lrPhoto">
+  <img id="lrPreview">
+  <textarea id="lrNotes"></textarea>
+
+  <!-- KITCHEN -->
+  <div class="section-title">Kitchen</div>
+  <label class="item"><input type="checkbox" id="k1"> Countertops</label>
+  <label class="item"><input type="checkbox" id="k2"> Sink</label>
+  <label class="item"><input type="checkbox" id="k3"> Refrigerator</label>
+  <label class="item"><input type="checkbox" id="k4"> Oven / Range</label>
+  <label class="item"><input type="checkbox" id="k5"> Microwave</label>
+  <label class="item"><input type="checkbox" id="k6"> Cabinets organized</label>
+  <label class="item"><input type="checkbox" id="k7"> Coffee Supplies Restocked</label>
+  <label class="item"><input type="checkbox" id="k8"> Trash Removed</label>
+
+  <input type="file" accept="image/*" capture="environment" id="kPhoto">
+  <img id="kPreview">
+  <textarea id="kNotes"></textarea>
+
+  <!-- BEDROOMS -->
+  <div class="section-title">Bedrooms (Bedroom 1 & 2)</div>
+  <label class="item"><input type="checkbox" id="b1"> Bed Made</label>
+  <label class="item"><input type="checkbox" id="b2"> Extra blankets</label>
+  <label class="item"><input type="checkbox" id="b3"> Drapes tied up</label>
+
+  <input type="file" accept="image/*" capture="environment" id="bPhoto">
+  <img id="bPreview">
+  <textarea id="bNotes"></textarea>
+
+  <!-- BATHROOM -->
+  <div class="section-title">Bathroom</div>
+  <label class="item"><input type="checkbox" id="ba1"> Toilet</label>
+  <label class="item"><input type="checkbox" id="ba2"> Shower/Tub</label>
+  <label class="item"><input type="checkbox" id="ba3"> Vanity</label>
+  <label class="item"><input type="checkbox" id="ba4"> Mirror</label>
+  <label class="item"><input type="checkbox" id="ba5"> Towels</label>
+  <label class="item"><input type="checkbox" id="ba6"> Supplies Restocked</label>
+  <label class="item"><input type="checkbox" id="ba7"> Floors</label>
+
+  <input type="file" accept="image/*" capture="environment" id="baPhoto">
+  <img id="baPreview">
+  <textarea id="baNotes"></textarea>
+
+  <!-- LAUNDRY -->
+  <div class="section-title">Laundry</div>
+  <label class="item"><input type="checkbox" id="l1"> Washer</label>
+  <label class="item"><input type="checkbox" id="l2"> Dryer</label>
+  <label class="item"><input type="checkbox" id="l3"> Laundry Supplies</label>
+
+  <!-- UTILITIES -->
+  <div class="section-title">Utilities</div>
+  <label class="item"><input type="checkbox" id="u1"> Temperature nice</label>
+  <label class="item"><input type="checkbox" id="u2"> Air quality nice</label>
+  <label class="item"><input type="checkbox" id="u3"> Smoke Detectors test</label>
+  <label class="item"><input type="checkbox" id="u4"> CO Detector test</label>
+  <label class="item"><input type="checkbox" id="u5"> Internet/Wi-Fi</label>
+  <label class="item"><input type="checkbox" id="u6"> Thermostat set</label>
+
+  <!-- INVENTORY -->
+  <div class="section-title">Inventory</div>
+  <label class="item"><input type="checkbox" id="i1"> Missing Items</label>
+  <label class="item"><input type="checkbox" id="i2"> Broken Items</label>
+  <label class="item"><input type="checkbox" id="i3"> Low Supplies</label>
+
+  <!-- MAINTENANCE -->
+  <div class="section-title">Maintenance</div>
+  <label class="item"><input type="checkbox" id="m1"> Plumbing</label>
+  <label class="item"><input type="checkbox" id="m2"> Electrical</label>
+  <label class="item"><input type="checkbox" id="m3"> Appliances</label>
+  <label class="item"><input type="checkbox" id="m4"> Furniture Damage</label>
+  <label class="item"><input type="checkbox" id="m5"> Paint</label>
+  <label class="item"><input type="checkbox" id="m6"> General Repairs</label>
+
+  <!-- FINAL -->
+  <div class="section-title">Final Quality Check</div>
+  <label class="item"><input type="checkbox" id="f1"> Property Ready</label>
+  <label class="item"><input type="checkbox" id="f2"> Lights Off</label>
+  <label class="item"><input type="checkbox" id="f3"> Doors Locked</label>
+  <label class="item"><input type="checkbox" id="f4"> Thermostat Set</label>
+
+  <input type="file" accept="image/*" capture="environment" id="finalPhoto">
+  <img id="finalPreview">
+
+  <button onclick="save()">Save Inspection</button>
+
 </div>
 
 <script>
-let inspections = JSON.parse(localStorage.getItem("inspections") || "[]");
-
-const photoInput = document.getElementById("photoInput");
-const preview = document.getElementById("preview");
-
-photoInput.addEventListener("change", function () {
-  const file = this.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    preview.src = e.target.result;
-    preview.style.display = "block";
-    preview.dataset.img = e.target.result;
-  };
-  reader.readAsDataURL(file);
-});
-
-function saveInspection() {
-  const category = document.getElementById("category").value;
-  const notes = document.getElementById("notes").value;
-  const image = preview.dataset.img || "";
-
-  const inspection = {
-    id: Date.now(),
-    category,
-    notes,
-    image,
-    timestamp: new Date().toISOString()
-  };
-
-  inspections.unshift(inspection);
-  localStorage.setItem("inspections", JSON.stringify(inspections));
-
-  document.getElementById("notes").value = "";
-  preview.style.display = "none";
-  preview.src = "";
-
-  render();
-}
-
-function render() {
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  inspections.forEach(i => {
-    const div = document.createElement("div");
-    div.className = "inspection";
-
-    div.innerHTML = `
-      <b>${i.category}</b><br>
-      <span class="small">${new Date(i.timestamp).toLocaleString()}</span>
-      <p>${i.notes || ""}</p>
-      ${i.image ? `<img src="${i.image}" />` : ""}
-    `;
-
-    list.appendChild(div);
+function preview(inputId, imgId) {
+  document.getElementById(inputId).addEventListener("change", function() {
+    const file = this.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById(imgId).src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   });
 }
 
-function exportData() {
-  const blob = new Blob([JSON.stringify(inspections, null, 2)], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
+preview("entryPhoto","entryPreview");
+preview("lrPhoto","lrPreview");
+preview("kPhoto","kPreview");
+preview("bPhoto","bPreview");
+preview("baPhoto","baPreview");
+preview("finalPhoto","finalPreview");
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "inspections.json";
-  a.click();
+function save() {
+  const data = {
+    entry: collect("entry"),
+    livingRoom: collect("lr"),
+    kitchen: collect("k"),
+    bedroom: collect("b"),
+    bathroom: collect("ba"),
+    laundry: collect("l"),
+    utilities: collect("u"),
+    inventory: collect("i"),
+    maintenance: collect("m"),
+    final: collect("f"),
+    timestamp: new Date().toISOString()
+  };
+
+  let existing = JSON.parse(localStorage.getItem("inspections") || "[]");
+  existing.unshift(data);
+  localStorage.setItem("inspections", JSON.stringify(existing));
+
+  alert("Inspection Saved");
 }
 
-render();
+function collect(prefix) {
+  let items = {};
+  document.querySelectorAll(`[id^="${prefix}"]`).forEach(el => {
+    if (el.type === "checkbox") {
+      items[el.id] = el.checked;
+    }
+  });
+  return items;
+}
 </script>
 
 </body>
