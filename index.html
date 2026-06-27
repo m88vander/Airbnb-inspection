@@ -71,10 +71,41 @@
       width: 100%;
       margin-top: 10px;
       border-radius: 8px;
+      max-height: 300px;
+      object-fit: cover;
     }
 
     .photo-input {
       margin-top: 8px;
+    }
+
+    .photo-container {
+      position: relative;
+      margin-top: 8px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-input-label {
+      display: block;
+      padding: 10px;
+      background: #f0f0f0;
+      border: 2px solid #0078D4;
+      border-radius: 6px;
+      text-align: center;
+      cursor: pointer;
+      color: #0078D4;
+      font-weight: bold;
     }
 
     .next-step-section {
@@ -96,8 +127,10 @@
       margin-top: 8px;
     }
 
-    input[type="file"] {
-      margin-top: 8px;
+    .photo-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -114,9 +147,13 @@
   <label class="item"><input type="checkbox" id="entry2"> Smart Lock functions</label>
   <label class="item"><input type="checkbox" id="entry3"> Entry Light on</label>
 
-  <div class="photo-input">
-    <input type="file" accept="image/*" capture="environment" id="entryPhoto">
+  <div class="photo-container">
+    <div class="file-input-wrapper">
+      <input type="file" id="entryPhoto" accept="image/*" capture="environment">
+      <label for="entryPhoto" class="file-input-label">📷 Take/Choose Entry Photo</label>
+    </div>
     <img id="entryPreview">
+    <div class="photo-label" id="entryLabel"></div>
   </div>
 
   <textarea id="entryNotes" placeholder="Entry notes..."></textarea>
@@ -130,8 +167,14 @@
   <label class="item"><input type="checkbox" id="lr5"> Floors clean</label>
   <label class="item"><input type="checkbox" id="lr6"> Plants watered</label>
 
-  <input type="file" accept="image/*" capture="environment" id="lrPhoto">
-  <img id="lrPreview">
+  <div class="photo-container">
+    <div class="file-input-wrapper">
+      <input type="file" id="lrPhoto" accept="image/*" capture="environment">
+      <label for="lrPhoto" class="file-input-label">📷 Take/Choose Living Room Photo</label>
+    </div>
+    <img id="lrPreview">
+    <div class="photo-label" id="lrLabel"></div>
+  </div>
   <textarea id="lrNotes"></textarea>
 
   <!-- KITCHEN -->
@@ -145,8 +188,14 @@
   <label class="item"><input type="checkbox" id="k7"> Coffee Supplies Restocked</label>
   <label class="item"><input type="checkbox" id="k8"> Trash Removed</label>
 
-  <input type="file" accept="image/*" capture="environment" id="kPhoto">
-  <img id="kPreview">
+  <div class="photo-container">
+    <div class="file-input-wrapper">
+      <input type="file" id="kPhoto" accept="image/*" capture="environment">
+      <label for="kPhoto" class="file-input-label">📷 Take/Choose Kitchen Photo</label>
+    </div>
+    <img id="kPreview">
+    <div class="photo-label" id="kLabel"></div>
+  </div>
   <textarea id="kNotes"></textarea>
 
   <!-- BEDROOMS -->
@@ -155,8 +204,14 @@
   <label class="item"><input type="checkbox" id="b2"> Extra blankets</label>
   <label class="item"><input type="checkbox" id="b3"> Drapes tied up</label>
 
-  <input type="file" accept="image/*" capture="environment" id="bPhoto">
-  <img id="bPreview">
+  <div class="photo-container">
+    <div class="file-input-wrapper">
+      <input type="file" id="bPhoto" accept="image/*" capture="environment">
+      <label for="bPhoto" class="file-input-label">📷 Take/Choose Bedroom Photo</label>
+    </div>
+    <img id="bPreview">
+    <div class="photo-label" id="bLabel"></div>
+  </div>
   <textarea id="bNotes"></textarea>
 
   <!-- BATHROOM -->
@@ -169,8 +224,14 @@
   <label class="item"><input type="checkbox" id="ba6"> Supplies Restocked</label>
   <label class="item"><input type="checkbox" id="ba7"> Floors</label>
 
-  <input type="file" accept="image/*" capture="environment" id="baPhoto">
-  <img id="baPreview">
+  <div class="photo-container">
+    <div class="file-input-wrapper">
+      <input type="file" id="baPhoto" accept="image/*" capture="environment">
+      <label for="baPhoto" class="file-input-label">📷 Take/Choose Bathroom Photo</label>
+    </div>
+    <img id="baPreview">
+    <div class="photo-label" id="baLabel"></div>
+  </div>
   <textarea id="baNotes"></textarea>
 
   <!-- LAUNDRY -->
@@ -210,8 +271,14 @@
   <label class="item"><input type="checkbox" id="f3"> Doors Locked</label>
   <label class="item"><input type="checkbox" id="f4"> Thermostat Set</label>
 
-  <input type="file" accept="image/*" capture="environment" id="finalPhoto">
-  <img id="finalPreview">
+  <div class="photo-container">
+    <div class="file-input-wrapper">
+      <input type="file" id="finalPhoto" accept="image/*" capture="environment">
+      <label for="finalPhoto" class="file-input-label">📷 Take/Choose Final Photo</label>
+    </div>
+    <img id="finalPreview">
+    <div class="photo-label" id="finalLabel"></div>
+  </div>
 
   <!-- NEXT STEPS -->
   <div class="next-step-section">
@@ -224,23 +291,32 @@
 </div>
 
 <script>
-function preview(inputId, imgId) {
-  document.getElementById(inputId).addEventListener("change", function() {
+function setupPhotoUpload(inputId, imgId, labelId) {
+  const input = document.getElementById(inputId);
+  const img = document.getElementById(imgId);
+  const label = document.getElementById(labelId);
+  
+  input.addEventListener('change', function(e) {
     const file = this.files[0];
-    const reader = new FileReader();
-    reader.onload = e => {
-      document.getElementById(imgId).src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        img.src = event.target.result;
+        img.style.display = 'block';
+        label.textContent = '✓ Photo added';
+      };
+      reader.readAsDataURL(file);
+    }
   });
 }
 
-preview("entryPhoto","entryPreview");
-preview("lrPhoto","lrPreview");
-preview("kPhoto","kPreview");
-preview("bPhoto","bPreview");
-preview("baPhoto","baPreview");
-preview("finalPhoto","finalPreview");
+// Setup all photo uploads
+setupPhotoUpload('entryPhoto', 'entryPreview', 'entryLabel');
+setupPhotoUpload('lrPhoto', 'lrPreview', 'lrLabel');
+setupPhotoUpload('kPhoto', 'kPreview', 'kLabel');
+setupPhotoUpload('bPhoto', 'bPreview', 'bLabel');
+setupPhotoUpload('baPhoto', 'baPreview', 'baLabel');
+setupPhotoUpload('finalPhoto', 'finalPreview', 'finalLabel');
 
 function save() {
   const data = {
